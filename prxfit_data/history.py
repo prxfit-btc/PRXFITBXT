@@ -109,18 +109,6 @@ def collect_history(days=30, fetchers=None):
         "warning": "Latest daily candle may be incomplete; markets and timestamps are source-specific."
     }
 
-def save_history(document, path=DEFAULT_DB):
-    """Store compressed history in existing SQLite DB without growing beyond 5 GiB.
-
-    History is a replaceable latest record, not an unlimited append-only log.
-    """
-    import zlib
-    payload = zlib.compress(json.dumps(document, allow_nan=False).encode(), 6)
-    with _connect(Path(path)) as db:
-        db.execute("CREATE TABLE IF NOT EXISTS history_cache (key TEXT PRIMARY KEY, data BLOB NOT NULL)")
-        db.execute("INSERT OR REPLACE INTO history_cache(key,data) VALUES('latest',?)", (payload,))
-        db.commit()
-
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="PRXFIT BTC historical context")
